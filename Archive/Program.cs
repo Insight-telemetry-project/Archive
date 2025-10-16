@@ -1,14 +1,17 @@
-var builder = WebApplication.CreateBuilder(args);
+using Archive.Models.Configuration;
+using Archive.Services.Mongo;
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.Configure<MongoSettings>(
+    builder.Configuration.GetSection(MongoSettings.SectionName));
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<TelemetryMongo>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
