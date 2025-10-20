@@ -3,13 +3,8 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Archive.Models.Schema
 {
-    public class TelemetryFieldsRecord
+    public class TelemetrySensorFields
     {
-
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } = string.Empty;
-
 
         [BsonElement("Fields")]
         public Dictionary<string, double> Fields { get; set; } = new();

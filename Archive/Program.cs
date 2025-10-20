@@ -7,7 +7,7 @@ builder.Services.AddControllers();
 builder.Services.Configure<MongoSettings>(
     builder.Configuration.GetSection(MongoSettings.SectionName));
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<TelemetryMongo>();
+builder.Services.AddSingleton<FlightTelemetryMongoProxy>();
 
 WebApplication app = builder.Build();
 
