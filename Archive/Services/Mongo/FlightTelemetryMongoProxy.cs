@@ -35,7 +35,7 @@ namespace Archive.Services.Mongo
                 .ToListAsync();
 
             if (results.Count == 0)
-                throw new KeyNotFoundException($"No TelemetryFields found for Master Index {masterIndex}");
+                return null;
 
             return results;
         }
@@ -51,7 +51,7 @@ namespace Archive.Services.Mongo
                 .ToListAsync();
 
             if (results.Count == 0)
-                throw new KeyNotFoundException($"No TelemetryFlightData found for Master Index {masterIndex}");
+                return null;
 
             return results;
         }

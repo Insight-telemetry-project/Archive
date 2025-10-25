@@ -11,39 +11,34 @@ namespace Archive.Controllers
     [Route("[controller]")]
     public class TelemetryDataArchiveController : ControllerBase
     {
-        private readonly FlightTelemetryMongoProxy _telemetryService;
+        private readonly FlightTelemetryMongoProxy _telemetryMongoProxy;
 
-        public TelemetryDataArchiveController(FlightTelemetryMongoProxy telemetryService)
+        public TelemetryDataArchiveController(FlightTelemetryMongoProxy telemetryMongoProxy)
         {
-            _telemetryService = telemetryService;
+            _telemetryMongoProxy = telemetryMongoProxy;
         }
 
         [HttpGet("fields/{masterIndex}")]
         public async Task<IActionResult> GetFieldsByMasterIndex(int masterIndex)
         {
-            try
-            {
-                List<TelemetrySensorFields> result = await _telemetryService.GetFromFieldsAsync(masterIndex);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException exceptions)
-            {
-                return NotFound(exceptions.Message);
-            }
+            List<TelemetrySensorFields>? result = await _telemetryMongoProxy.GetFromFieldsAsync(masterIndex);
+
+            if (result == null)
+                return NotFound($"No TelemetryFields found for Master Index {masterIndex}");
+
+            return Ok(result);
         }
 
         [HttpGet("flight/{masterIndex}")]
         public async Task<IActionResult> GetFlightByMasterIndex(int masterIndex)
         {
-            try
-            {
-                List<TelemetryFlightData> result = await _telemetryService.GetFromFlightDataAsync(masterIndex);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException exceptions)
-            {
-                return NotFound(exceptions.Message);
-            }
+            List<TelemetryFlightData>? result = await _telemetryMongoProxy.GetFromFlightDataAsync(masterIndex);
+
+            if (result == null)
+                return NotFound($"No TelemetryFlightData found for Master Index {masterIndex}");
+
+            return Ok(result);
+
         }
     }
 }
