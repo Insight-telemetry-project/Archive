@@ -13,5 +13,8 @@ namespace Archive.Models.Schema
         
         [BsonElement("Connections")]
         public Dictionary<string, List<string>> Connections { get; set; } = new();
+
+        [BsonElement("Anomalies")]
+        public Dictionary<string, List<long>> Anomalies { get; set; } = new Dictionary<string, List<long>>();
     }
 }
