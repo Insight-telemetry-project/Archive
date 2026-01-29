@@ -15,12 +15,14 @@ namespace Archive.Controllers
     {
         private readonly FlightTelemetryMongoProxy _telemetryMongoProxy;
         private readonly IContrillerUtilscs _contrillerUtilscs;
+        private readonly ICacheMongo _cacheMongo;
 
 
-        public TelemetryDataArchiveController(FlightTelemetryMongoProxy telemetryMongoProxy, IContrillerUtilscs contrillerUtilscs)
+        public TelemetryDataArchiveController(FlightTelemetryMongoProxy telemetryMongoProxy, IContrillerUtilscs contrillerUtilscs, ICacheMongo cacheMongo)
         {
             _telemetryMongoProxy = telemetryMongoProxy;
             _contrillerUtilscs = contrillerUtilscs;
+            _cacheMongo = cacheMongo;
         }
 
         [HttpGet("fields/{masterIndex}")]
@@ -37,7 +39,7 @@ namespace Archive.Controllers
         [HttpGet("flight/{masterIndex}")]
         public async Task<IActionResult> GetFlightByMasterIndex(int masterIndex)
         {
-            List<TelemetryFlightData>? result = await _telemetryMongoProxy.GetFromFlightDataAsync(masterIndex);
+            TelemetryFlightData? result = await _telemetryMongoProxy.GetFromFlightDataAsync(masterIndex);
 
             if (result == null)
                 return NotFound($"No TelemetryFlightData found for Master Index {masterIndex}");
@@ -48,7 +50,7 @@ namespace Archive.Controllers
         [HttpGet("all-flight")]
         public async Task<ActionResult<List<existingFlight>>> GetAllFlights()
         {
-            List<existingFlight> result =await _contrillerUtilscs.GetExistingFlights();
+            List<existingFlight> result = await _contrillerUtilscs.GetExistingFlights();
             return Ok(result);
         }
 
@@ -57,6 +59,24 @@ namespace Archive.Controllers
         {
             await _telemetryMongoProxy.DeleteAllDataByMasterIndexAsync(masterIndex);
             return Ok(new { message = "Flight data has been deleted." });
+        }
+
+        [HttpGet("get-flight-points/{masterIndex}/{parameter}")]
+        public async Task<IActionResult> GetFlightPointsByMasterIndex(int masterIndex,string parameter)
+        {
+            List<long> result = await _cacheMongo.GetParamterFlightDataAsync(masterIndex,parameter);
+            if (result == null)
+                return NotFound($"No Flight Points found for Master Index {masterIndex}");
+            return Ok(result);
+        }
+
+        [HttpGet("get-flight-connections/{masterIndex}/{parameter}")]
+        public async Task<IActionResult> GetFlightConnectionsByMasterIndex(int masterIndex, string parameter)
+        {
+            List<string> result = await _cacheMongo.GetConnectionsFlightDataAsync(masterIndex, parameter);
+            if (result == null)
+                return NotFound($"No Flight Connections found for Master Index {masterIndex}");
+            return Ok(result);
         }
     }
 }
