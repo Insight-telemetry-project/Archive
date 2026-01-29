@@ -11,7 +11,7 @@ builder.Services.Configure<MongoSettings>(
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<FlightTelemetryMongoProxy>();
 builder.Services.AddSingleton<IContrillerUtilscs, ContrillerUtils>();
-
+builder.Services.AddSingleton<ICacheMongo, CacheMongo>();
 
 builder.Services.AddCors(options =>
 {
@@ -22,6 +22,7 @@ builder.Services.AddCors(options =>
                      .AllowAnyMethod();
     });
 });
+builder.Services.AddMemoryCache();
 
 WebApplication app = builder.Build();
 

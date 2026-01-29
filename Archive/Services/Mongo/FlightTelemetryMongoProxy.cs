@@ -41,20 +41,18 @@ namespace Archive.Services.Mongo
             return results;
         }
 
-        public async Task<List<TelemetryFlightData>> GetFromFlightDataAsync(int masterIndex)
+        public async Task<TelemetryFlightData> GetFromFlightDataAsync(int masterIndex)
         {
             FilterDefinition<TelemetryFlightData> filter =
                 Builders<TelemetryFlightData>.Filter.Eq(ConstantFligth.FLIGHT_ID, masterIndex);
 
-            List<TelemetryFlightData> results = await _telemetryFlightData
+            TelemetryFlightData result = await _telemetryFlightData
                 .Find(filter)
-                .Project<TelemetryFlightData>(Builders<TelemetryFlightData>.Projection.Exclude(ConstantFligth.MONGO_ID))
-                .ToListAsync();
+                .Project<TelemetryFlightData>(
+                    Builders<TelemetryFlightData>.Projection.Exclude(ConstantFligth.MONGO_ID))
+                .FirstOrDefaultAsync();
 
-            if (results.Count == 0)
-                return null;
-
-            return results;
+            return result;
         }
 
         public async Task<List<TelemetryFlightData>> GetAllFlightDataAsync()
