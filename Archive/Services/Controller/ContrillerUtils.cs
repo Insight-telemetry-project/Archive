@@ -1,4 +1,5 @@
-﻿using Archive.Models.Dto;
+﻿using Analyzer_Service.Models.Schema;
+using Archive.Models.Dto;
 using Archive.Models.Interface;
 using Archive.Models.Schema;
 using Archive.Services.Mongo;
@@ -25,6 +26,21 @@ namespace Archive.Services.Controller
                 existingFlights.Add(flight);
             }
             return existingFlights;
+        }
+
+        public async Task<List<HistoricalSimilarityPoint>> GetHistoricalSimilarityFlightDataAsync(int masterIndex, string parameter)
+        {
+            return await _telemetryMongoProxy.GetHistoricalSimilarityByParamter(masterIndex, parameter);
+        }
+
+        public async Task<List<long>> GetAnomaliesByParameter(int masterIndex, string parameter)
+        {
+            return await _telemetryMongoProxy.GetAnomaliesByParameter(masterIndex, parameter);
+        }
+
+        public async Task<List<string>> GetConnectionsByParameter(int masterIndex, string parameter)
+        {
+            return await _telemetryMongoProxy.GetConnectionsByParameter(masterIndex, parameter);
         }
     }
 }
