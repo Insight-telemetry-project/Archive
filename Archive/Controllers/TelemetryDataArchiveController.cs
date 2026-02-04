@@ -1,4 +1,5 @@
-﻿using Archive.Models.Dto;
+﻿using Analyzer_Service.Models.Schema;
+using Archive.Models.Dto;
 using Archive.Models.Interface;
 using Archive.Models.Schema;
 using Archive.Services.Mongo;
@@ -76,6 +77,15 @@ namespace Archive.Controllers
             List<string> result = await _cacheMongo.GetConnectionsFlightDataAsync(masterIndex, parameter);
             if (result == null)
                 return NotFound($"No Flight Connections found for Master Index {masterIndex}");
+            return Ok(result);
+        }
+
+        [HttpGet("get-flight-historical-similarity/{masterIndex}/{parameter}")]
+        public async Task<IActionResult> GetFlightHistoricalSimilarityByMasterIndex(int masterIndex, string parameter)
+        {
+            List<HistoricalSimilarityPoint> result = await _cacheMongo.GetHistoricalSimilarityFlightDataAsync(masterIndex, parameter);
+            if (result == null)
+                return NotFound($"No Flight Historical Similarity found for Master Index {masterIndex}");
             return Ok(result);
         }
     }
