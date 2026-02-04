@@ -1,6 +1,8 @@
-﻿using Archive.Models.Interface;
+﻿using Analyzer_Service.Models.Schema;
+using Archive.Models.Interface;
 using Archive.Models.Schema;
 using Microsoft.Extensions.Caching.Memory;
+using System.Reflection.Metadata;
 
 namespace Archive.Services.Mongo
 {
@@ -48,6 +50,10 @@ namespace Archive.Services.Mongo
             TelemetryFlightData flightData = await GetAllFlightDataAsync(masterIndex);
             return flightData.Connections[parameter];
         }
-
+        public async Task<List<HistoricalSimilarityPoint>> GetHistoricalSimilarityFlightDataAsync(int masterIndex,string parameter)
+        {
+            TelemetryFlightData flightData = await GetAllFlightDataAsync(masterIndex);
+            return flightData.HistoricalSimilarity[parameter];
+        }
     }
 }
