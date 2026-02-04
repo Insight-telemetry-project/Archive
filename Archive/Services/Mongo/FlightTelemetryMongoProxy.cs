@@ -1,7 +1,10 @@
-﻿using Archive.Models.Configuration;
+﻿using Analyzer_Service.Models.Schema;
+using Archive.Models.Configuration;
 using Archive.Models.Constant;
 using Archive.Models.Schema;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -78,5 +81,105 @@ namespace Archive.Services.Mongo
                 _historicalAnomalies.DeleteManyAsync(filterAnomalies)
             );
         }
+
+
+        public async Task<List<HistoricalSimilarityPoint>>GetHistoricalSimilarityByParamter(int masterIndex, string parameter)
+        {
+            FilterDefinition<TelemetryFlightData> filterDefinition =
+                Builders<TelemetryFlightData>.Filter.Eq(
+                    flightData => flightData.MasterIndex,
+                    masterIndex);
+
+            string historicalSimilarityFieldPath =$"HistoricalSimilarity.{parameter}";
+
+            ProjectionDefinition<TelemetryFlightData> projectionDefinition =
+                Builders<TelemetryFlightData>.Projection
+                    .Include(historicalSimilarityFieldPath);
+
+            BsonDocument projectedDocument =
+                await _telemetryFlightData
+                    .Find(filterDefinition)
+                    .Project<BsonDocument>(projectionDefinition)
+                    .FirstAsync();
+
+            BsonDocument historicalSimilarityDocument =
+                projectedDocument["HistoricalSimilarity"].AsBsonDocument;
+
+            BsonArray similarityPointsArray =historicalSimilarityDocument[parameter].AsBsonArray;
+
+            List<HistoricalSimilarityPoint> similarityPoints =
+                similarityPointsArray.Select(point =>BsonSerializer.Deserialize<HistoricalSimilarityPoint>(point.AsBsonDocument)).ToList();
+
+            return similarityPoints;
+        }
+
+        public async Task<List<string>> GetConnectionsByParameter(int masterIndex, string parameter)
+        {
+            FilterDefinition<TelemetryFlightData> filterDefinition =
+                Builders<TelemetryFlightData>.Filter.Eq(
+                    flightData => flightData.MasterIndex,
+                    masterIndex);
+
+            string connectionsFieldPath = $"Connections.{parameter}";
+
+            ProjectionDefinition<TelemetryFlightData> projectionDefinition =
+                Builders<TelemetryFlightData>.Projection
+                    .Include(connectionsFieldPath);
+
+            BsonDocument projectedDocument =
+                await _telemetryFlightData
+                    .Find(filterDefinition)
+                    .Project<BsonDocument>(projectionDefinition)
+                    .FirstAsync();
+
+            BsonDocument connectionsDocument =
+                projectedDocument["Connections"].AsBsonDocument;
+
+            BsonArray connectionsArray =
+                connectionsDocument[parameter].AsBsonArray;
+
+            List<string> connections =
+                connectionsArray
+                    .Select(connectionValue => connectionValue.AsString)
+                    .ToList();
+
+            return connections;
+        }
+
+        public async Task<List<long>> GetAnomaliesByParameter(int masterIndex, string parameter)
+        {
+            FilterDefinition<TelemetryFlightData> filterDefinition =
+                Builders<TelemetryFlightData>.Filter.Eq(
+                    flightData => flightData.MasterIndex,
+                    masterIndex);
+
+            string anomaliesFieldPath = $"Anomalies.{parameter}";
+
+            ProjectionDefinition<TelemetryFlightData> projectionDefinition =
+                Builders<TelemetryFlightData>.Projection
+                    .Include(anomaliesFieldPath);
+
+            BsonDocument projectedDocument =
+                await _telemetryFlightData
+                    .Find(filterDefinition)
+                    .Project<BsonDocument>(projectionDefinition)
+                    .FirstAsync();
+
+            BsonDocument anomaliesDocument =
+                projectedDocument["Anomalies"].AsBsonDocument;
+
+            BsonArray anomaliesArray =
+                anomaliesDocument[parameter].AsBsonArray;
+
+            List<long> anomalies =
+                anomaliesArray
+                    .Select(anomalyValue => anomalyValue.ToInt64())
+                    .ToList();
+
+            return anomalies;
+        }
+
+
+
     }
 }
