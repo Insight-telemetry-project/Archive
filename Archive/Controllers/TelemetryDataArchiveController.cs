@@ -61,9 +61,9 @@ namespace Archive.Controllers
         }
 
         [HttpGet("get-flight-points/{masterIndex}/{parameter}")]
-        public async Task<IActionResult> GetFlightPointsByMasterIndex(int masterIndex,string parameter)
+        public async Task<IActionResult> GetFlightPointsByMasterIndex(int masterIndex, string parameter)
         {
-            List<long> result = await _contrillerUtilscs.GetAnomaliesByParameter(masterIndex,parameter);
+            List<long> result = await _contrillerUtilscs.GetAnomaliesByParameter(masterIndex, parameter);
             if (result == null)
                 return NotFound($"No Flight Points found for Master Index {masterIndex}");
             return Ok(result);
@@ -84,6 +84,20 @@ namespace Archive.Controllers
             List<HistoricalSimilarityPoint> result = await _contrillerUtilscs.GetHistoricalSimilarityFlightDataAsync(masterIndex, parameter);
             if (result == null)
                 return NotFound($"No Flight Historical Similarity found for Master Index {masterIndex}");
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("get-all-special-points-for-flight/{masterIndex}")]
+        public async Task<IActionResult> GetAllSpecialPointsForFlight(int masterIndex)
+        {
+            FlightSuspiciousPointsDto result =
+                await _contrillerUtilscs.GetAllSuspiciousPointsForFlightAsync(masterIndex);
+
+            if (result == null)
+                return NotFound($"No Special Points found for Master Index {masterIndex}");
+
             return Ok(result);
         }
     }
