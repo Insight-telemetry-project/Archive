@@ -42,5 +42,10 @@ namespace Archive.Services.Controller
         {
             return await _telemetryMongoProxy.GetConnectionsByParameter(masterIndex, parameter);
         }
+
+        public async Task<FlightSuspiciousPointsDto> GetAllSuspiciousPointsForFlightAsync(int masterIndex)
+        {
+            return await _telemetryMongoProxy.GetAllSpecialPointsForFlightAsync(masterIndex);
+        }
     }
 }

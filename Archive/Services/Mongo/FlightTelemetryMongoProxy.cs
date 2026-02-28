@@ -1,6 +1,7 @@
 ﻿using Analyzer_Service.Models.Schema;
 using Archive.Models.Configuration;
 using Archive.Models.Constant;
+using Archive.Models.Dto;
 using Archive.Models.Schema;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -57,6 +58,20 @@ namespace Archive.Services.Mongo
 
             return result;
         }
+        public async Task<List<HistoricalAnomaly>> GetFromHistoricalAnomaliesAsync(int masterIndex)
+        {
+            FilterDefinition<HistoricalAnomaly> filter =
+                Builders<HistoricalAnomaly>.Filter.Eq(ConstantFligth.FLIGHT_ID, masterIndex);
+            List<HistoricalAnomaly> results = await _historicalAnomalies
+                .Find(filter)
+                .Project<HistoricalAnomaly>(Builders<HistoricalAnomaly>.Projection.Exclude(ConstantFligth.MONGO_ID))
+                .ToListAsync();
+            if (results.Count == 0)
+                return null;
+            return results;
+        }
+
+
 
         public async Task<List<TelemetryFlightData>> GetAllFlightDataAsync()
         {
@@ -179,7 +194,76 @@ namespace Archive.Services.Mongo
             return anomalies;
         }
 
+        public async Task<FlightSuspiciousPointsDto> GetAllSpecialPointsForFlightAsync(int masterIndex)
+        {
+            FilterDefinition<TelemetryFlightData> filterDefinition =
+                Builders<TelemetryFlightData>.Filter.Eq(
+                    flightData => flightData.MasterIndex,
+                    masterIndex);
 
+            ProjectionDefinition<TelemetryFlightData> projectionDefinition =
+                Builders<TelemetryFlightData>.Projection
+                    .Include("Anomalies")
+                    .Include("HistoricalSimilarity")
+                    .Exclude("_id");
+
+            BsonDocument projectedDocument =
+                await _telemetryFlightData
+                    .Find(filterDefinition)
+                    .Project<BsonDocument>(projectionDefinition)
+                    .FirstOrDefaultAsync();
+
+            if (projectedDocument == null)
+                return null;
+
+            FlightSuspiciousPointsDto flightSpecialPointsDto = new FlightSuspiciousPointsDto
+            {
+                Anomalies = new Dictionary<string, List<long>>(),
+                HistoricalSimilarity = new Dictionary<string, List<HistoricalSimilarityPoint>>()
+            };
+
+            if (projectedDocument.Contains("Anomalies"))
+            {
+                BsonDocument anomaliesDocument = projectedDocument["Anomalies"].AsBsonDocument;
+
+                foreach (BsonElement parameterElement in anomaliesDocument.Elements)
+                {
+                    string parameterName = parameterElement.Name;
+
+                    BsonArray anomaliesArray = parameterElement.Value.AsBsonArray;
+
+                    List<long> anomalyPoints = anomaliesArray
+                        .Select(anomalyValue => anomalyValue.ToInt64())
+                        .ToList();
+
+                    flightSpecialPointsDto.Anomalies.Add(parameterName, anomalyPoints);
+                }
+            }
+
+            if (projectedDocument.Contains("HistoricalSimilarity"))
+            {
+                BsonDocument historicalSimilarityDocument =
+                    projectedDocument["HistoricalSimilarity"].AsBsonDocument;
+
+                foreach (BsonElement parameterElement in historicalSimilarityDocument.Elements)
+                {
+                    string parameterName = parameterElement.Name;
+
+                    BsonArray similarityArray = parameterElement.Value.AsBsonArray;
+
+                    List<HistoricalSimilarityPoint> similarityPoints =
+                        similarityArray
+                            .Select(point =>
+                                BsonSerializer.Deserialize<HistoricalSimilarityPoint>(
+                                    point.AsBsonDocument))
+                            .ToList();
+
+                    flightSpecialPointsDto.HistoricalSimilarity.Add(parameterName, similarityPoints);
+                }
+            }
+
+            return flightSpecialPointsDto;
+        }
 
     }
 }
