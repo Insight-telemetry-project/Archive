@@ -2,6 +2,7 @@
 using Archive.Models.Configuration;
 using Archive.Models.Constant;
 using Archive.Models.Dto;
+using Archive.Models.Mongo;
 using Archive.Models.Schema;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Archive.Services.Mongo
 {
-    public class FlightTelemetryMongoProxy
+    public class FlightTelemetryMongoProxy : IFlightTelemetryMongoProxy
     {
         private readonly IMongoCollection<TelemetrySensorFields> _telemetryFields;
         private readonly IMongoCollection<TelemetryFlightData> _telemetryFlightData;
@@ -37,6 +38,7 @@ namespace Archive.Services.Mongo
             List<TelemetrySensorFields> results = await _telemetryFields
                 .Find(filter)
                 .Project<TelemetrySensorFields>(Builders<TelemetrySensorFields>.Projection.Exclude(ConstantFligth.MONGO_ID))
+                .SortBy(field => field.Timestep)
                 .ToListAsync();
 
             if (results.Count == 0)
@@ -263,6 +265,32 @@ namespace Archive.Services.Mongo
             }
 
             return flightSpecialPointsDto;
+        }
+
+
+        public async Task<IAsyncCursor<TelemetrySensorFields>> GetFromFieldsCursorAsync(int masterIndex)
+        {
+            FilterDefinition<TelemetrySensorFields> filter =
+                Builders<TelemetrySensorFields>.Filter.Eq(
+                    ConstantFligth.FLIGHT_ID,
+                    masterIndex);
+
+            FindOptions<TelemetrySensorFields> options =
+                new FindOptions<TelemetrySensorFields>
+                {
+                    Sort = Builders<TelemetrySensorFields>.Sort
+                        .Ascending(field => field.Timestep),
+
+                    Projection = Builders<TelemetrySensorFields>.Projection
+                        .Exclude(ConstantFligth.MONGO_ID),
+
+                    BatchSize = 500
+                };
+
+            IAsyncCursor<TelemetrySensorFields> cursor =
+                await _telemetryFields.FindAsync(filter, options);
+
+            return cursor;
         }
 
     }

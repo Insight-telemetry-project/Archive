@@ -1,7 +1,10 @@
 using Archive.Models.Configuration;
-using Archive.Services.Mongo;
 using Archive.Models.Interface;
+using Archive.Models.Interface.Export;
+using Archive.Models.Mongo;
 using Archive.Services.Controller;
+using Archive.Services.Export;
+using Archive.Services.Mongo;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
@@ -11,6 +14,8 @@ builder.Services.Configure<MongoSettings>(
 builder.Services.AddOpenApi();
 builder.Services.AddSingleton<FlightTelemetryMongoProxy>();
 builder.Services.AddSingleton<IContrillerUtilscs, ContrillerUtils>();
+builder.Services.AddSingleton<IFlightTelemetryMongoProxy, FlightTelemetryMongoProxy>();
+builder.Services.AddSingleton<IExportService, ExportService>();
 
 builder.Services.AddCors(options =>
 {
