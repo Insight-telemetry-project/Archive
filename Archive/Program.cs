@@ -16,7 +16,7 @@ builder.Services.AddSingleton<FlightTelemetryMongoProxy>();
 builder.Services.AddSingleton<IContrillerUtilscs, ContrillerUtils>();
 builder.Services.AddSingleton<IFlightTelemetryMongoProxy, FlightTelemetryMongoProxy>();
 builder.Services.AddSingleton<IExportService, ExportService>();
-
+builder.Services.AddSingleton<IFactoryFormat, FrameExporterFactory>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policyBuilder =>
