@@ -12,17 +12,19 @@ namespace Archive.Services.Export
     public class ExportService : IExportService
     {
         private readonly IFlightTelemetryMongoProxy _flightTelemetryMongoProxy;
+        private readonly IFactoryFormat _frameExporterFactory;
 
-        public ExportService(IFlightTelemetryMongoProxy flightTelemetryMongoProxy)
+        public ExportService(
+            IFlightTelemetryMongoProxy flightTelemetryMongoProxy,
+            IFactoryFormat frameExporterFactory)
         {
             _flightTelemetryMongoProxy = flightTelemetryMongoProxy;
+            _frameExporterFactory = frameExporterFactory;
         }
-
-
 
         public async Task<Stream> ExportFlightAsync(int masterIndex, ExportFormat format)
         {
-            IFrameExporter exporter = CreateExporter(format);
+            IFrameExporter exporter = _frameExporterFactory.CreateExporter(format);
 
             MemoryStream zipStream = new MemoryStream();
 
@@ -56,30 +58,9 @@ namespace Archive.Services.Export
             await exporter.EndAsync();
 
             archive.Dispose();
-
             zipStream.Position = 0;
 
             return zipStream;
-        }
-
-        private IFrameExporter CreateExporter(ExportFormat format)
-        {
-            if (format == ExportFormat.Json)
-            {
-                return new JsonFrameExporter();
-            }
-
-            if (format == ExportFormat.Csv)
-            {
-                return new CsvFrameExporter();
-            }
-
-            if (format == ExportFormat.Pcap)
-            {
-                return new PcapFrameExporter();
-            }
-
-            throw new Exception("Unsupported export format");
         }
     }
 }
