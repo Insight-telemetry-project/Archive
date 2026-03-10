@@ -14,11 +14,11 @@ namespace Archive.Services.Export
         private List<string> _parameters;
         private bool _headerWritten = false;
         public Task StartAsync(
-    ZipArchive archive,
-    int flightId,
-    FlightSuspiciousPointsDto specialPoints,
-    Dictionary<string, List<string>> connections,
-    Dictionary<string, int> fields)
+            ZipArchive archive,
+            int flightId,
+            FlightSuspiciousPointsDto specialPoints,
+            Dictionary<string, List<string>> connections,
+            Dictionary<string, int> fields)
         {
 
             ZipArchiveEntry anomaliesEntry = archive.CreateEntry("anomalies.csv");

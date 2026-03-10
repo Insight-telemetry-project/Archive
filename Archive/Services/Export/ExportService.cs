@@ -28,7 +28,7 @@ namespace Archive.Services.Export
 
             MemoryStream zipStream = new MemoryStream();
 
-            ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
+            using ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true);
 
             FlightSuspiciousPointsDto specialPoints =
                 await _flightTelemetryMongoProxy.GetAllSpecialPointsForFlightAsync(masterIndex);
