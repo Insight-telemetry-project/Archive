@@ -1,0 +1,12 @@
+@startuml
+class ContrillerUtils {
+    - <<readonly>> _telemetryMongoProxy : IFlightTelemetryMongoProxy
+    + ContrillerUtils(flightTelemetryMongoProxy:IFlightTelemetryMongoProxy)
+    + <<async>> GetExistingFlights() : Task<List<existingFlight>>
+    + <<async>> GetHistoricalSimilarityFlightDataAsync(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    + <<async>> GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    + <<async>> GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    + <<async>> GetAllSuspiciousPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+}
+IContrillerUtilscs <|-- ContrillerUtils
+@enduml

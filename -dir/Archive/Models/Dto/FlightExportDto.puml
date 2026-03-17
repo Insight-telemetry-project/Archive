@@ -1,0 +1,9 @@
+@startuml
+class FlightExportDto {
+    + FlightId : int <<get>> <<set>>
+    + Frames : List<TelemetrySensorFields> <<get>> <<set>>
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+    + Connections : Dictionary<string, List<string>> <<get>> <<set>>
+}
+@enduml

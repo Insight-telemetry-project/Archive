@@ -1,0 +1,10 @@
+@startuml
+class MongoSettings {
+    + <<const>> SectionName : string = "MongoSettings"
+    + ConnectionString : string <<get>> <<set>>
+    + DatabaseName : string <<get>> <<set>>
+    + CollectionTelemetryFields : string <<get>> <<set>>
+    + CollectionTelemetryFlightData : string <<get>> <<set>>
+    + CollectionHistoricalAnomalies : string <<get>> <<set>>
+}
+@enduml

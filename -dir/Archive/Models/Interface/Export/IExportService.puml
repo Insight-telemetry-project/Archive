@@ -1,0 +1,5 @@
+@startuml
+interface IExportService {
+    ExportFlightAsync(masterIndex:int, format:ExportFormat) : Task<Stream>
+}
+@enduml

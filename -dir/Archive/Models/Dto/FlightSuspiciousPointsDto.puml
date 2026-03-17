@@ -1,0 +1,6 @@
+@startuml
+class FlightSuspiciousPointsDto {
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+}
+@enduml

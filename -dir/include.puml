@@ -1,0 +1,192 @@
+@startuml
+class TelemetryDataArchiveController {
+    - <<readonly>> _telemetryMongoProxy : IFlightTelemetryMongoProxy
+    - <<readonly>> _contrillerUtilscs : IContrillerUtilscs
+    - <<readonly>> _exportService : IExportService
+    + TelemetryDataArchiveController(telemetryMongoProxy:IFlightTelemetryMongoProxy, contrillerUtilscs:IContrillerUtilscs, exportService:IExportService)
+    + <<async>> GetFieldsByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetFlightByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetAllFlights() : Task<ActionResult<List<existingFlight>>>
+    + <<async>> DeleteFlightByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetFlightPointsByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetFlightConnectionsByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetFlightHistoricalSimilarityByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetAllSpecialPointsForFlight(masterIndex:int) : Task<IActionResult>
+    + <<async>> ExportFlight(masterIndex:int, format:ExportFormat) : Task<IActionResult>
+}
+ControllerBase <|-- TelemetryDataArchiveController
+class MongoSettings {
+    + <<const>> SectionName : string = "MongoSettings"
+    + ConnectionString : string <<get>> <<set>>
+    + DatabaseName : string <<get>> <<set>>
+    + CollectionTelemetryFields : string <<get>> <<set>>
+    + CollectionTelemetryFlightData : string <<get>> <<set>>
+    + CollectionHistoricalAnomalies : string <<get>> <<set>>
+}
+class ConstantFligth {
+    + <<const>> FLIGHT_ID : string = "Master Index"
+    + <<const>> MONGO_ID : string = "_id"
+}
+class existingFlight {
+    + flightNumber : int <<get>> <<set>>
+    + flightLenght : int <<get>> <<set>>
+    + existingFlight(flightNumber:int, flightLenght:int)
+}
+class ExportFrameDto {
+    + Timestep : int <<get>> <<set>>
+    + Values : Dictionary<string, double> <<get>> <<set>>
+    + IsAnomaly : bool <<get>> <<set>>
+}
+class FlightExportDto {
+    + FlightId : int <<get>> <<set>>
+    + Frames : List<TelemetrySensorFields> <<get>> <<set>>
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+    + Connections : Dictionary<string, List<string>> <<get>> <<set>>
+}
+class FlightSuspiciousPointsDto {
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+}
+class SegmentFeatures {
+    + DurationSeconds : double <<get>> <<set>>
+    + MeanZ : double <<get>> <<set>>
+    + StdZ : double <<get>> <<set>>
+    + MinZ : double <<get>> <<set>>
+    + MaxZ : double <<get>> <<set>>
+    + RangeZ : double <<get>> <<set>>
+    + EnergyZ : double <<get>> <<set>>
+    + Slope : double <<get>> <<set>>
+    + PeakCount : int <<get>> <<set>>
+    + TroughCount : int <<get>> <<set>>
+    + MeanPrev : double <<get>> <<set>>
+    + MeanNext : double <<get>> <<set>>
+}
+enum ExportFormat {
+    Json,
+    Csv,
+    Pcap,
+}
+interface IContrillerUtilscs {
+    GetExistingFlights() : Task<List<existingFlight>>
+    GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    GetHistoricalSimilarityFlightDataAsync(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    GetAllSuspiciousPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+}
+interface IFlightTelemetryMongoProxy {
+    GetFromFieldsAsync(masterIndex:int) : Task<List<TelemetrySensorFields>>
+    GetFromFlightDataAsync(masterIndex:int) : Task<TelemetryFlightData>
+    GetFromHistoricalAnomaliesAsync(masterIndex:int) : Task<List<HistoricalAnomaly>>
+    GetAllFlightDataAsync() : Task<List<TelemetryFlightData>>
+    DeleteAllDataByMasterIndexAsync(masterIndex:int) : Task
+    GetHistoricalSimilarityByParamter(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    GetAllSpecialPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+    GetFromFieldsCursorAsync(masterIndex:int) : Task<IAsyncCursor<TelemetrySensorFields>>
+}
+class HistoricalAnomaly {
+    + Id : string <<get>> <<set>>
+    + MasterIndex : int <<get>> <<set>>
+    + ParameterName : string <<get>> <<set>>
+    + StartIndex : int <<get>> <<set>>
+    + EndIndex : int <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + PatternHash : string <<get>> <<set>>
+    + FeatureValues : SegmentFeatures <<get>> <<set>>
+    + CreatedAt : DateTime <<get>> <<set>>
+}
+class HistoricalSimilarityPoint {
+    + RecordId : string <<get>> <<set>>
+    + ComparedFlightIndex : int <<get>> <<set>>
+    + StartIndex : long <<get>> <<set>>
+    + EndIndex : long <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + FinalScore : double <<get>> <<set>>
+}
+class TelemetryFlightData {
+    + MasterIndex : int <<get>> <<set>>
+    + Fields : Dictionary<string, int> <<get>> <<set>>
+    + Connections : Dictionary<string, List<string>> <<get>> <<set>>
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+}
+class TelemetrySensorFields {
+    + Fields : Dictionary<string, double> <<get>> <<set>>
+    + Timestep : int <<get>> <<set>>
+    + MasterIndex : int <<get>> <<set>>
+}
+class ContrillerUtils {
+    - <<readonly>> _telemetryMongoProxy : IFlightTelemetryMongoProxy
+    + ContrillerUtils(flightTelemetryMongoProxy:IFlightTelemetryMongoProxy)
+    + <<async>> GetExistingFlights() : Task<List<existingFlight>>
+    + <<async>> GetHistoricalSimilarityFlightDataAsync(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    + <<async>> GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    + <<async>> GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    + <<async>> GetAllSuspiciousPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+}
+IContrillerUtilscs <|-- ContrillerUtils
+class CsvFrameExporter {
+    - _writer : StreamWriter
+    - _parameters : List<string>
+    - _headerWritten : bool = false
+    + StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    + WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    + EndAsync() : Task
+}
+IFrameExporter <|-- CsvFrameExporter
+class ExportService {
+    - <<readonly>> _flightTelemetryMongoProxy : IFlightTelemetryMongoProxy
+    - <<readonly>> _frameExporterFactory : IFactoryFormat
+    + ExportService(flightTelemetryMongoProxy:IFlightTelemetryMongoProxy, frameExporterFactory:IFactoryFormat)
+    + <<async>> ExportFlightAsync(masterIndex:int, format:ExportFormat) : Task<Stream>
+}
+IExportService <|-- ExportService
+class FrameExporterFactory {
+    + CreateExporter(format:ExportFormat) : IFrameExporter
+}
+IFactoryFormat <|-- FrameExporterFactory
+class JsonFrameExporter {
+    - _writer : System.Text.Json.Utf8JsonWriter
+    + StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    + WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    + EndAsync() : Task
+}
+IFrameExporter <|-- JsonFrameExporter
+class PcapFrameExporter {
+    - _writer : BinaryWriter
+    + StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    + WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    + EndAsync() : Task
+}
+IFrameExporter <|-- PcapFrameExporter
+class FlightTelemetryMongoProxy {
+    - <<readonly>> _telemetryFields : IMongoCollection<TelemetrySensorFields>
+    - <<readonly>> _telemetryFlightData : IMongoCollection<TelemetryFlightData>
+    - <<readonly>> _historicalAnomalies : IMongoCollection<HistoricalAnomaly>
+    + FlightTelemetryMongoProxy(settings:IOptions<MongoSettings>)
+    + <<async>> GetFromFieldsAsync(masterIndex:int) : Task<List<TelemetrySensorFields>>
+    + <<async>> GetFromFlightDataAsync(masterIndex:int) : Task<TelemetryFlightData>
+    + <<async>> GetFromHistoricalAnomaliesAsync(masterIndex:int) : Task<List<HistoricalAnomaly>>
+    + <<async>> GetAllFlightDataAsync() : Task<List<TelemetryFlightData>>
+    + <<async>> DeleteAllDataByMasterIndexAsync(masterIndex:int) : Task
+    + <<async>> GetHistoricalSimilarityByParamter(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    + <<async>> GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    + <<async>> GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    + <<async>> GetAllSpecialPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+    + <<async>> GetFromFieldsCursorAsync(masterIndex:int) : Task<IAsyncCursor<TelemetrySensorFields>>
+}
+IFlightTelemetryMongoProxy <|-- FlightTelemetryMongoProxy
+interface IExportService {
+    ExportFlightAsync(masterIndex:int, format:ExportFormat) : Task<Stream>
+}
+interface IFactoryFormat {
+    CreateExporter(format:ExportFormat) : IFrameExporter
+}
+interface IFrameExporter {
+    StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    EndAsync() : Task
+}
+@enduml

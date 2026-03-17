@@ -1,0 +1,7 @@
+@startuml
+interface IFrameExporter {
+    StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    EndAsync() : Task
+}
+@enduml

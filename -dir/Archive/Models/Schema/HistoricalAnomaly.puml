@@ -1,0 +1,13 @@
+@startuml
+class HistoricalAnomaly {
+    + Id : string <<get>> <<set>>
+    + MasterIndex : int <<get>> <<set>>
+    + ParameterName : string <<get>> <<set>>
+    + StartIndex : int <<get>> <<set>>
+    + EndIndex : int <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + PatternHash : string <<get>> <<set>>
+    + FeatureValues : SegmentFeatures <<get>> <<set>>
+    + CreatedAt : DateTime <<get>> <<set>>
+}
+@enduml

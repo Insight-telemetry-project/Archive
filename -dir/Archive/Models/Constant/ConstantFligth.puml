@@ -1,0 +1,6 @@
+@startuml
+class ConstantFligth {
+    + <<const>> FLIGHT_ID : string = "Master Index"
+    + <<const>> MONGO_ID : string = "_id"
+}
+@enduml

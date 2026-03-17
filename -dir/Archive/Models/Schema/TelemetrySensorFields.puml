@@ -1,0 +1,7 @@
+@startuml
+class TelemetrySensorFields {
+    + Fields : Dictionary<string, double> <<get>> <<set>>
+    + Timestep : int <<get>> <<set>>
+    + MasterIndex : int <<get>> <<set>>
+}
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+class SegmentFeatures {
+    + DurationSeconds : double <<get>> <<set>>
+    + MeanZ : double <<get>> <<set>>
+    + StdZ : double <<get>> <<set>>
+    + MinZ : double <<get>> <<set>>
+    + MaxZ : double <<get>> <<set>>
+    + RangeZ : double <<get>> <<set>>
+    + EnergyZ : double <<get>> <<set>>
+    + Slope : double <<get>> <<set>>
+    + PeakCount : int <<get>> <<set>>
+    + TroughCount : int <<get>> <<set>>
+    + MeanPrev : double <<get>> <<set>>
+    + MeanNext : double <<get>> <<set>>
+}
+@enduml
