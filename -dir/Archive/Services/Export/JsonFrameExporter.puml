@@ -1,0 +1,9 @@
+@startuml
+class JsonFrameExporter {
+    - _writer : System.Text.Json.Utf8JsonWriter
+    + StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    + WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    + EndAsync() : Task
+}
+IFrameExporter <|-- JsonFrameExporter
+@enduml

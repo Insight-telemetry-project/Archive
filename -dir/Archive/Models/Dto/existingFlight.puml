@@ -1,0 +1,7 @@
+@startuml
+class existingFlight {
+    + flightNumber : int <<get>> <<set>>
+    + flightLenght : int <<get>> <<set>>
+    + existingFlight(flightNumber:int, flightLenght:int)
+}
+@enduml

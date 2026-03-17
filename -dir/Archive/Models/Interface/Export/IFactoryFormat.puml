@@ -1,0 +1,5 @@
+@startuml
+interface IFactoryFormat {
+    CreateExporter(format:ExportFormat) : IFrameExporter
+}
+@enduml

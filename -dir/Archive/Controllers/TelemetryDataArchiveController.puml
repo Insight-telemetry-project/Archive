@@ -1,0 +1,18 @@
+@startuml
+class TelemetryDataArchiveController {
+    - <<readonly>> _telemetryMongoProxy : IFlightTelemetryMongoProxy
+    - <<readonly>> _contrillerUtilscs : IContrillerUtilscs
+    - <<readonly>> _exportService : IExportService
+    + TelemetryDataArchiveController(telemetryMongoProxy:IFlightTelemetryMongoProxy, contrillerUtilscs:IContrillerUtilscs, exportService:IExportService)
+    + <<async>> GetFieldsByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetFlightByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetAllFlights() : Task<ActionResult<List<existingFlight>>>
+    + <<async>> DeleteFlightByMasterIndex(masterIndex:int) : Task<IActionResult>
+    + <<async>> GetFlightPointsByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetFlightConnectionsByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetFlightHistoricalSimilarityByMasterIndex(masterIndex:int, parameter:string) : Task<IActionResult>
+    + <<async>> GetAllSpecialPointsForFlight(masterIndex:int) : Task<IActionResult>
+    + <<async>> ExportFlight(masterIndex:int, format:ExportFormat) : Task<IActionResult>
+}
+ControllerBase <|-- TelemetryDataArchiveController
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class ExportService {
+    - <<readonly>> _flightTelemetryMongoProxy : IFlightTelemetryMongoProxy
+    - <<readonly>> _frameExporterFactory : IFactoryFormat
+    + ExportService(flightTelemetryMongoProxy:IFlightTelemetryMongoProxy, frameExporterFactory:IFactoryFormat)
+    + <<async>> ExportFlightAsync(masterIndex:int, format:ExportFormat) : Task<Stream>
+}
+IExportService <|-- ExportService
+@enduml

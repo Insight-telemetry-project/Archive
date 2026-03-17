@@ -1,0 +1,11 @@
+@startuml
+class CsvFrameExporter {
+    - _writer : StreamWriter
+    - _parameters : List<string>
+    - _headerWritten : bool = false
+    + StartAsync(archive:ZipArchive, flightId:int, specialPoints:FlightSuspiciousPointsDto, connections:Dictionary<string, List<string>>, fields:Dictionary<string, int>) : Task
+    + WriteFrameAsync(frame:TelemetrySensorFields) : Task
+    + EndAsync() : Task
+}
+IFrameExporter <|-- CsvFrameExporter
+@enduml

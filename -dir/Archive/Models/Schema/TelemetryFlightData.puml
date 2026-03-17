@@ -1,0 +1,9 @@
+@startuml
+class TelemetryFlightData {
+    + MasterIndex : int <<get>> <<set>>
+    + Fields : Dictionary<string, int> <<get>> <<set>>
+    + Connections : Dictionary<string, List<string>> <<get>> <<set>>
+    + Anomalies : Dictionary<string, List<long>> <<get>> <<set>>
+    + HistoricalSimilarity : Dictionary<string, List<HistoricalSimilarityPoint>> <<get>> <<set>>
+}
+@enduml

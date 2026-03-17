@@ -1,0 +1,10 @@
+@startuml
+class HistoricalSimilarityPoint {
+    + RecordId : string <<get>> <<set>>
+    + ComparedFlightIndex : int <<get>> <<set>>
+    + StartIndex : long <<get>> <<set>>
+    + EndIndex : long <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + FinalScore : double <<get>> <<set>>
+}
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+class FlightTelemetryMongoProxy {
+    - <<readonly>> _telemetryFields : IMongoCollection<TelemetrySensorFields>
+    - <<readonly>> _telemetryFlightData : IMongoCollection<TelemetryFlightData>
+    - <<readonly>> _historicalAnomalies : IMongoCollection<HistoricalAnomaly>
+    + FlightTelemetryMongoProxy(settings:IOptions<MongoSettings>)
+    + <<async>> GetFromFieldsAsync(masterIndex:int) : Task<List<TelemetrySensorFields>>
+    + <<async>> GetFromFlightDataAsync(masterIndex:int) : Task<TelemetryFlightData>
+    + <<async>> GetFromHistoricalAnomaliesAsync(masterIndex:int) : Task<List<HistoricalAnomaly>>
+    + <<async>> GetAllFlightDataAsync() : Task<List<TelemetryFlightData>>
+    + <<async>> DeleteAllDataByMasterIndexAsync(masterIndex:int) : Task
+    + <<async>> GetHistoricalSimilarityByParamter(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    + <<async>> GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    + <<async>> GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    + <<async>> GetAllSpecialPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+    + <<async>> GetFromFieldsCursorAsync(masterIndex:int) : Task<IAsyncCursor<TelemetrySensorFields>>
+}
+IFlightTelemetryMongoProxy <|-- FlightTelemetryMongoProxy
+@enduml

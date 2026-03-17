@@ -1,0 +1,9 @@
+@startuml
+interface IContrillerUtilscs {
+    GetExistingFlights() : Task<List<existingFlight>>
+    GetConnectionsByParameter(masterIndex:int, parameter:string) : Task<List<string>>
+    GetAnomaliesByParameter(masterIndex:int, parameter:string) : Task<List<long>>
+    GetHistoricalSimilarityFlightDataAsync(masterIndex:int, parameter:string) : Task<List<HistoricalSimilarityPoint>>
+    GetAllSuspiciousPointsForFlightAsync(masterIndex:int) : Task<FlightSuspiciousPointsDto>
+}
+@enduml

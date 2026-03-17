@@ -1,0 +1,7 @@
+@startuml
+class ExportFrameDto {
+    + Timestep : int <<get>> <<set>>
+    + Values : Dictionary<string, double> <<get>> <<set>>
+    + IsAnomaly : bool <<get>> <<set>>
+}
+@enduml
