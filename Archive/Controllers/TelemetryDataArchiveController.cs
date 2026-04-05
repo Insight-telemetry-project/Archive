@@ -44,8 +44,7 @@ namespace Archive.Controllers
         [HttpGet("flight/{masterIndex}")]
         public async Task<IActionResult> GetFlightByMasterIndex(int masterIndex)
         {
-            TelemetryFlightData? result =
-                await _telemetryMongoProxy.GetFromFlightDataAsync(masterIndex);
+            TelemetryFlightData? result =await _telemetryMongoProxy.GetFromFlightDataAsync(masterIndex);
 
             if (result == null)
                 return NotFound($"No TelemetryFlightData found for Master Index {masterIndex}");
@@ -73,7 +72,7 @@ namespace Archive.Controllers
         [HttpGet("get-flight-points/{masterIndex}/{parameter}")]
         public async Task<IActionResult> GetFlightPointsByMasterIndex(int masterIndex, string parameter)
         {
-            List<long> result =
+            List<AnomalyWindow> result =
                 await _contrillerUtilscs.GetAnomaliesByParameter(masterIndex, parameter);
 
             if (result == null)
@@ -88,8 +87,8 @@ namespace Archive.Controllers
             List<string> result =
                 await _contrillerUtilscs.GetConnectionsByParameter(masterIndex, parameter);
 
-            if (result == null)
-                return NotFound($"No Flight Connections found for Master Index {masterIndex}");
+            if (result == null || result.Count == 0)
+                return Ok(new List<string>());
 
             return Ok(result);
         }

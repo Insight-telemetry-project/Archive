@@ -17,11 +17,11 @@ namespace Archive.Models.Schema
         [BsonElement("ParameterName")]
         public string ParameterName { get; set; }
 
-        [BsonElement("StartIndex")]
-        public int StartIndex { get; set; }
+        [BsonElement("StartEpoch")]
+        public long StartEpoch { get; set; }
 
-        [BsonElement("EndIndex")]
-        public int EndIndex { get; set; }
+        [BsonElement("EndEpoch")]
+        public long EndEpoch { get; set; }
 
         [BsonElement("Label")]
         public string Label { get; set; }
@@ -31,7 +31,9 @@ namespace Archive.Models.Schema
 
         [BsonElement("FeatureValues")]
         public SegmentFeatures FeatureValues { get; set; } = new SegmentFeatures();
-
+        
+        [BsonElement("AnomalyEpochSeconds")]
+        public long AnomalyEpochSeconds { get; set; }
 
         [BsonElement("CreatedAt")]
         public DateTime CreatedAt { get; set; }

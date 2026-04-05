@@ -100,14 +100,14 @@ namespace Archive.Services.Mongo
         }
 
 
-        public async Task<List<HistoricalSimilarityPoint>>GetHistoricalSimilarityByParamter(int masterIndex, string parameter)
+        public async Task<List<HistoricalSimilarityPoint>> GetHistoricalSimilarityByParamter(int masterIndex, string parameter)
         {
             FilterDefinition<TelemetryFlightData> filterDefinition =
                 Builders<TelemetryFlightData>.Filter.Eq(
                     flightData => flightData.MasterIndex,
                     masterIndex);
 
-            string historicalSimilarityFieldPath =$"HistoricalSimilarity.{parameter}";
+            string historicalSimilarityFieldPath = $"HistoricalSimilarity.{parameter}";
 
             ProjectionDefinition<TelemetryFlightData> projectionDefinition =
                 Builders<TelemetryFlightData>.Projection
@@ -117,15 +117,28 @@ namespace Archive.Services.Mongo
                 await _telemetryFlightData
                     .Find(filterDefinition)
                     .Project<BsonDocument>(projectionDefinition)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
+
+            if (projectedDocument == null)
+                return new List<HistoricalSimilarityPoint>();
+
+            if (!projectedDocument.Contains("HistoricalSimilarity"))
+                return new List<HistoricalSimilarityPoint>();
 
             BsonDocument historicalSimilarityDocument =
                 projectedDocument["HistoricalSimilarity"].AsBsonDocument;
 
-            BsonArray similarityPointsArray =historicalSimilarityDocument[parameter].AsBsonArray;
+            if (!historicalSimilarityDocument.Contains(parameter))
+                return new List<HistoricalSimilarityPoint>();
+
+            BsonArray similarityPointsArray =
+                historicalSimilarityDocument[parameter].AsBsonArray;
 
             List<HistoricalSimilarityPoint> similarityPoints =
-                similarityPointsArray.Select(point =>BsonSerializer.Deserialize<HistoricalSimilarityPoint>(point.AsBsonDocument)).ToList();
+                similarityPointsArray
+                    .Select(point =>
+                        BsonSerializer.Deserialize<HistoricalSimilarityPoint>(point.AsBsonDocument))
+                    .ToList();
 
             return similarityPoints;
         }
@@ -147,10 +160,19 @@ namespace Archive.Services.Mongo
                 await _telemetryFlightData
                     .Find(filterDefinition)
                     .Project<BsonDocument>(projectionDefinition)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
+
+            if (projectedDocument == null)
+                return new List<string>();
+
+            if (!projectedDocument.Contains("Connections"))
+                return new List<string>();
 
             BsonDocument connectionsDocument =
                 projectedDocument["Connections"].AsBsonDocument;
+
+            if (!connectionsDocument.Contains(parameter))
+                return new List<string>();
 
             BsonArray connectionsArray =
                 connectionsDocument[parameter].AsBsonArray;
@@ -163,7 +185,7 @@ namespace Archive.Services.Mongo
             return connections;
         }
 
-        public async Task<List<long>> GetAnomaliesByParameter(int masterIndex, string parameter)
+        public async Task<List<AnomalyWindow>> GetAnomaliesByParameter(int masterIndex, string parameter)
         {
             FilterDefinition<TelemetryFlightData> filterDefinition =
                 Builders<TelemetryFlightData>.Filter.Eq(
@@ -180,17 +202,22 @@ namespace Archive.Services.Mongo
                 await _telemetryFlightData
                     .Find(filterDefinition)
                     .Project<BsonDocument>(projectionDefinition)
-                    .FirstAsync();
+                    .FirstOrDefaultAsync();
 
-            BsonDocument anomaliesDocument =
-                projectedDocument["Anomalies"].AsBsonDocument;
+            if (projectedDocument == null || !projectedDocument.Contains("Anomalies"))
+                return new List<AnomalyWindow>();
 
-            BsonArray anomaliesArray =
-                anomaliesDocument[parameter].AsBsonArray;
+            BsonDocument anomaliesDocument = projectedDocument["Anomalies"].AsBsonDocument;
 
-            List<long> anomalies =
+            if (!anomaliesDocument.Contains(parameter))
+                return new List<AnomalyWindow>();
+
+            BsonArray anomaliesArray = anomaliesDocument[parameter].AsBsonArray;
+
+            List<AnomalyWindow> anomalies =
                 anomaliesArray
-                    .Select(anomalyValue => anomalyValue.ToInt64())
+                    .Select(a =>
+                        BsonSerializer.Deserialize<AnomalyWindow>(a.AsBsonDocument))
                     .ToList();
 
             return anomalies;
@@ -220,7 +247,7 @@ namespace Archive.Services.Mongo
 
             FlightSuspiciousPointsDto flightSpecialPointsDto = new FlightSuspiciousPointsDto
             {
-                Anomalies = new Dictionary<string, List<long>>(),
+                Anomalies = new Dictionary<string, List<AnomalyWindow>>(),
                 HistoricalSimilarity = new Dictionary<string, List<HistoricalSimilarityPoint>>()
             };
 
@@ -234,11 +261,13 @@ namespace Archive.Services.Mongo
 
                     BsonArray anomaliesArray = parameterElement.Value.AsBsonArray;
 
-                    List<long> anomalyPoints = anomaliesArray
-                        .Select(anomalyValue => anomalyValue.ToInt64())
-                        .ToList();
+                    List<AnomalyWindow> anomalyWindows =
+                        anomaliesArray
+                            .Select(a =>
+                                BsonSerializer.Deserialize<AnomalyWindow>(a.AsBsonDocument))
+                            .ToList();
 
-                    flightSpecialPointsDto.Anomalies.Add(parameterName, anomalyPoints);
+                    flightSpecialPointsDto.Anomalies.Add(parameterName, anomalyWindows);
                 }
             }
 
@@ -292,6 +321,7 @@ namespace Archive.Services.Mongo
 
             return cursor;
         }
+
 
     }
 }

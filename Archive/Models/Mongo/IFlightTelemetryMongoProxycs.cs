@@ -21,10 +21,9 @@ namespace Archive.Models.Mongo
 
         Task<List<string>> GetConnectionsByParameter(int masterIndex, string parameter);
 
-        Task<List<long>> GetAnomaliesByParameter(int masterIndex, string parameter);
+        Task<List<AnomalyWindow>> GetAnomaliesByParameter(int masterIndex, string parameter);
 
         Task<FlightSuspiciousPointsDto> GetAllSpecialPointsForFlightAsync(int masterIndex);
         Task<IAsyncCursor<TelemetrySensorFields>> GetFromFieldsCursorAsync(int masterIndex);
-
     }
 }

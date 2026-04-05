@@ -33,10 +33,16 @@ namespace Archive.Services.Controller
             foreach (TelemetryFlightData flightData in flightDataList)
             {
                 int flightNumber = flightData.MasterIndex;
-                int flightLength = flightData.Fields["flight_length"];
 
-                existingFlight flight =
-                    new existingFlight(flightNumber, flightLength);
+                int flightLength = 0;
+
+                if (flightData.Fields != null &&
+                    flightData.Fields.TryGetValue("flight_length", out int length))
+                {
+                    flightLength = length;
+                }
+
+                existingFlight flight =new existingFlight(flightNumber, flightLength);
 
                 existingFlights.Add(flight);
             }
@@ -49,7 +55,7 @@ namespace Archive.Services.Controller
             return await _telemetryMongoProxy.GetHistoricalSimilarityByParamter(masterIndex, parameter);
         }
 
-        public async Task<List<long>> GetAnomaliesByParameter(int masterIndex, string parameter)
+        public async Task<List<AnomalyWindow>> GetAnomaliesByParameter(int masterIndex, string parameter)
         {
             return await _telemetryMongoProxy.GetAnomaliesByParameter(masterIndex, parameter);
         }
