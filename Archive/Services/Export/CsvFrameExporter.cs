@@ -28,13 +28,22 @@ namespace Archive.Services.Export
             {
                 anomaliesWriter.WriteLine("parameter,timestep");
 
-                foreach (KeyValuePair<string, List<long>> pair in specialPoints.Anomalies)
+
+                anomaliesWriter.WriteLine("parameter,startEpoch,endEpoch,representativeEpoch,label");
+
+                foreach (KeyValuePair<string, List<AnomalyWindow>> pair in specialPoints.Anomalies)
                 {
-                    foreach (long ts in pair.Value)
+                    foreach (AnomalyWindow window in pair.Value)
                     {
                         anomaliesWriter.Write(pair.Key);
                         anomaliesWriter.Write(",");
-                        anomaliesWriter.WriteLine(ts);
+                        anomaliesWriter.Write(window.StartEpoch);
+                        anomaliesWriter.Write(",");
+                        anomaliesWriter.Write(window.EndEpoch);
+                        anomaliesWriter.Write(",");
+                        anomaliesWriter.Write(window.RepresentativeEpoch);
+                        anomaliesWriter.Write(",");
+                        anomaliesWriter.WriteLine(window.Label);
                     }
                 }
             }
@@ -74,9 +83,9 @@ namespace Archive.Services.Export
                     {
                         similarityWriter.Write(pair.Key);
                         similarityWriter.Write(",");
-                        similarityWriter.Write(point.StartIndex);
+                        similarityWriter.Write(point.StartEpoch);
                         similarityWriter.Write(",");
-                        similarityWriter.Write(point.EndIndex);
+                        similarityWriter.Write(point.EndEpoch);
                         similarityWriter.Write(",");
                         similarityWriter.Write(point.Label);
                         similarityWriter.Write(",");
@@ -110,7 +119,7 @@ namespace Archive.Services.Export
                     _parameters.Add(key);
                 }
 
-                _writer.Write("timestep");
+                _writer.Write("timestamp");
 
                 foreach (string parameter in _parameters)
                 {
@@ -123,7 +132,8 @@ namespace Archive.Services.Export
                 _headerWritten = true;
             }
 
-            _writer.Write(frame.Timestep);
+            DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(frame.Timestep);
+            _writer.Write(date.UtcDateTime.ToString("o"));
 
             foreach (string parameter in _parameters)
             {

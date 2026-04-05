@@ -17,7 +17,7 @@ namespace Archive.Models.Schema
         public Dictionary<string, List<string>> Connections { get; set; } = new();
 
         [BsonElement("Anomalies")]
-        public Dictionary<string, List<long>> Anomalies { get; set; } = new Dictionary<string, List<long>>();
+        public Dictionary<string, List<AnomalyWindow>> Anomalies { get; set; } = new();
 
         [BsonElement("HistoricalSimilarity")]
         public Dictionary<string, List<HistoricalSimilarityPoint>> HistoricalSimilarity { get; set; } = new();

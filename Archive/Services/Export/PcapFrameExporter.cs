@@ -83,8 +83,8 @@ namespace Archive.Services.Export
 
             byte[] packetData = packetStream.ToArray();
 
-            uint seconds = (uint)frame.Timestep;
-            uint microseconds = 0;
+            uint seconds = (uint)(frame.Timestep / 1000);
+            uint microseconds = (uint)((frame.Timestep % 1000) * 1000);
 
             _writer.Write(seconds);
             _writer.Write(microseconds);

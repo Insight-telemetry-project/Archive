@@ -12,11 +12,14 @@ namespace Analyzer_Service.Models.Schema
         [BsonElement("ComparedFlightIndex")]
         public int ComparedFlightIndex { get; set; }
 
-        [BsonElement("StartIndex")]
-        public long StartIndex { get; set; }
+        [BsonElement("StartEpoch")]
+        public long StartEpoch { get; set; }
 
-        [BsonElement("EndIndex")]
-        public long EndIndex { get; set; }
+        [BsonElement("EndEpoch")]
+        public long EndEpoch { get; set; }
+
+        [BsonElement("AnomalyTime")]
+        public long AnomalyTime { get; set; }
 
         [BsonElement("Label")]
         public string Label { get; set; } = string.Empty;

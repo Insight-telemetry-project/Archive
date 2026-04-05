@@ -61,7 +61,8 @@ namespace Archive.Services.Export
         {
             _writer.WriteStartObject();
 
-            _writer.WriteNumber("timestep", frame.Timestep);
+            DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(frame.Timestep);
+            _writer.WriteString("timestamp", date.UtcDateTime.ToString("o"));
 
             _writer.WritePropertyName("values");
 
