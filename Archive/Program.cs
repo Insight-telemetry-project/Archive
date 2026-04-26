@@ -7,6 +7,7 @@ using Archive.Services.Export;
 using Archive.Services.Mongo;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine("Mongo from ENV: " + builder.Configuration["MongoSettings:ConnectionString"]);
 
 builder.Services.AddControllers();
 builder.Services.Configure<MongoSettings>(
