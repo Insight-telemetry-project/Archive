@@ -61,13 +61,7 @@ namespace Archive.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("delete-flight/{masterIndex}")]
-        public async Task<IActionResult> DeleteFlightByMasterIndex(int masterIndex)
-        {
-            await _telemetryMongoProxy.DeleteAllDataByMasterIndexAsync(masterIndex);
-
-            return Ok(new { message = "Flight data has been deleted." });
-        }
+        
 
         [HttpGet("get-flight-points/{masterIndex}/{parameter}")]
         public async Task<IActionResult> GetFlightPointsByMasterIndex(int masterIndex, string parameter)
@@ -130,6 +124,58 @@ namespace Archive.Controllers
                 "application/zip",
                 fileName
             );
+        }
+
+        [HttpPost("investigations")]
+        public async Task<IActionResult> CreateInvestigation([FromBody] CreateInvestigationDto dto)
+        {
+            Investigation investigation = new Investigation
+            {
+                MasterIndex = dto.MasterIndex,
+                Param = dto.Param,
+                Time = dto.Time,
+                Value = dto.Value,
+                Name = dto.Name,
+                Description = dto.Description
+            };
+
+            Investigation created = await _telemetryMongoProxy.CreateInvestigationAsync(investigation);
+
+            return Ok(created);
+        }
+
+        [HttpGet("investigations/{masterIndex:int}")]
+        public async Task<IActionResult> GetInvestigationsForFlight(int masterIndex)
+        {
+            List<Investigation> result =
+                await _telemetryMongoProxy.GetInvestigationsByFlightAsync(masterIndex);
+
+            return Ok(result);
+        }
+
+        [HttpPost("update-investigations/{id}")]
+        public async Task<IActionResult> UpdateInvestigation(string id, [FromBody] UpdateInvestigationDto dto)
+        {
+            Investigation? updated = await _telemetryMongoProxy.UpdateInvestigationAsync(id, dto.Name, dto.Description);
+            if (updated == null) return NotFound();
+            return Ok(updated);
+        }
+
+        [HttpDelete("investigations/{id}")]
+        public async Task<IActionResult> DeleteInvestigation(string id)
+        {
+            await _telemetryMongoProxy.DeleteInvestigationAsync(id);
+            return NoContent();
+        }
+
+        [HttpDelete("delete-flight/{masterIndex}")]
+        public async Task<IActionResult> DeleteFlightByMasterIndex(int masterIndex)
+        {
+            await _telemetryMongoProxy.RemoveHistoricalReferencesToFlightAsync(masterIndex);
+
+            await _telemetryMongoProxy.DeleteAllDataByMasterIndexAsync(masterIndex);
+
+            return Ok(new { message = "Flight data has been deleted." });
         }
     }
 }

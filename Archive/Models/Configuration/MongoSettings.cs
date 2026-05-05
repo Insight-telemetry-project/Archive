@@ -9,6 +9,7 @@
         public string CollectionTelemetryFields { get; set; } = string.Empty;
         public string CollectionTelemetryFlightData { get; set; } = string.Empty;
         public string CollectionHistoricalAnomalies { get; set; } = string.Empty;
+        public string CollectionInvestigations { get; set; } = string.Empty;
 
     }
 }

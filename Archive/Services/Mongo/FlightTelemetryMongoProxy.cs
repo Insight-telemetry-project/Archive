@@ -18,6 +18,8 @@ namespace Archive.Services.Mongo
         private readonly IMongoCollection<TelemetrySensorFields> _telemetryFields;
         private readonly IMongoCollection<TelemetryFlightData> _telemetryFlightData;
         private readonly IMongoCollection<HistoricalAnomaly> _historicalAnomalies;
+        private readonly IMongoCollection<Investigation> _investigations;
+
         public FlightTelemetryMongoProxy(IOptions<MongoSettings> settings)
         {
             MongoSettings mongoSettings = settings.Value;
@@ -28,6 +30,7 @@ namespace Archive.Services.Mongo
             _telemetryFields = database.GetCollection<TelemetrySensorFields>(mongoSettings.CollectionTelemetryFields);
             _telemetryFlightData = database.GetCollection<TelemetryFlightData>(mongoSettings.CollectionTelemetryFlightData);
             _historicalAnomalies = database.GetCollection<HistoricalAnomaly>(mongoSettings.CollectionHistoricalAnomalies);
+            _investigations = database.GetCollection<Investigation>(mongoSettings.CollectionInvestigations);
         }
 
         public async Task<List<TelemetrySensorFields>> GetFromFieldsAsync(int masterIndex)
@@ -91,11 +94,13 @@ namespace Archive.Services.Mongo
             FilterDefinition<TelemetrySensorFields> filter = Builders<TelemetrySensorFields>.Filter.Eq("MasterIndex", masterIndex);
             FilterDefinition<TelemetryFlightData> filterFlight = Builders<TelemetryFlightData>.Filter.Eq("MasterIndex", masterIndex);
             FilterDefinition<HistoricalAnomaly> filterAnomalies = Builders<HistoricalAnomaly>.Filter.Eq("MasterIndex", masterIndex);
+            FilterDefinition<Investigation> filterInvestigations = Builders<Investigation>.Filter.Eq(inv => inv.MasterIndex, masterIndex);
 
             await Task.WhenAll(
                 _telemetryFields.DeleteManyAsync(filter),
                 _telemetryFlightData.DeleteManyAsync(filterFlight),
-                _historicalAnomalies.DeleteManyAsync(filterAnomalies)
+                _historicalAnomalies.DeleteManyAsync(filterAnomalies),
+                _investigations.DeleteManyAsync(filterInvestigations)
             );
         }
 
@@ -322,6 +327,84 @@ namespace Archive.Services.Mongo
             return cursor;
         }
 
+        public async Task<Investigation> CreateInvestigationAsync(Investigation investigation)
+        {
+            investigation.CreatedAt = DateTime.UtcNow;
+            await _investigations.InsertOneAsync(investigation);
+            return investigation;
+        }
+
+        public async Task<List<Investigation>> GetInvestigationsByFlightAsync(int masterIndex)
+        {
+            FilterDefinition<Investigation> filter =
+                Builders<Investigation>.Filter.Eq(inv => inv.MasterIndex, masterIndex);
+
+            List<Investigation> results = await _investigations
+                .Find(filter)
+                .SortByDescending(inv => inv.CreatedAt)
+                .ToListAsync();
+
+            return results;
+        }
+
+        public async Task<Investigation?> UpdateInvestigationAsync(string id, string name, string description)
+        {
+            FilterDefinition<Investigation> filter =
+                Builders<Investigation>.Filter.Eq(inv => inv.Id, id);
+
+            UpdateDefinition<Investigation> update = Builders<Investigation>.Update
+                .Set(inv => inv.Name, name)
+                .Set(inv => inv.Description, description);
+
+            FindOneAndUpdateOptions<Investigation> options = new()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+
+            return await _investigations.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task DeleteInvestigationAsync(string id)
+        {
+            FilterDefinition<Investigation> filter =
+                Builders<Investigation>.Filter.Eq(inv => inv.Id, id);
+
+            await _investigations.DeleteOneAsync(filter);
+        }
+
+
+        public async Task RemoveHistoricalReferencesToFlightAsync(int deletedFlightId)
+        {
+            FilterDefinition<TelemetryFlightData> filter = Builders<TelemetryFlightData>.Filter.Empty;
+
+            List<TelemetryFlightData> allFlights = await _telemetryFlightData.Find(filter).ToListAsync();
+
+            foreach (TelemetryFlightData flight in allFlights)
+            {
+                bool updated = false;
+
+                foreach (KeyValuePair<string, List<HistoricalSimilarityPoint>> entry in flight.HistoricalSimilarity)
+                {
+                    List<HistoricalSimilarityPoint> filteredList = entry.Value
+                        .Where(point => point.ComparedFlightIndex != deletedFlightId)
+                        .ToList();
+
+                    if (filteredList.Count != entry.Value.Count)
+                    {
+                        flight.HistoricalSimilarity[entry.Key] = filteredList;
+                        updated = true;
+                    }
+                }
+
+                if (updated)
+                {
+                    FilterDefinition<TelemetryFlightData> updateFilter =
+                        Builders<TelemetryFlightData>.Filter.Eq(f => f.MasterIndex, flight.MasterIndex);
+
+                    await _telemetryFlightData.ReplaceOneAsync(updateFilter, flight);
+                }
+            }
+        }
 
     }
 }

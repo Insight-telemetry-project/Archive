@@ -25,5 +25,12 @@ namespace Archive.Models.Mongo
 
         Task<FlightSuspiciousPointsDto> GetAllSpecialPointsForFlightAsync(int masterIndex);
         Task<IAsyncCursor<TelemetrySensorFields>> GetFromFieldsCursorAsync(int masterIndex);
+
+        Task<Investigation> CreateInvestigationAsync(Investigation investigation);
+        Task<List<Investigation>> GetInvestigationsByFlightAsync(int masterIndex);
+        Task<Investigation?> UpdateInvestigationAsync(string id, string name, string description);
+        Task DeleteInvestigationAsync(string id);
+
+        Task RemoveHistoricalReferencesToFlightAsync(int deletedFlightId);
     }
 }
